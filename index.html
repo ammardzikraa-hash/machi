@@ -173,10 +173,10 @@ Anyway, congrats on starting college! Hope everything goes smoothly and you stay
     const musik = document.getElementById("bg-music");
     const popup = document.getElementById("popup");
 
-    function showPopup(text = 'nah kan, lupa yee!') {
+    function showPopup(text = 'nah kan, lupa yee!', duration = 2000) {
       popup.innerText = text;
       popup.style.display = 'block';
-      setTimeout(() => popup.style.display = 'none', 2000);
+      setTimeout(() => popup.style.display = 'none', duration);
     }
 
     function mulaiKuis() {
@@ -191,15 +191,18 @@ Anyway, congrats on starting college! Hope everything goes smoothly and you stay
 
     function cekJawaban(pilihan, jawabanBenar, halamanSalah, halamanBenar, terakhir = false) {
       if (pilihan === jawabanBenar) {
-        if (terakhir) showPopup('Alhamdullilah inget');
-        keHalaman(halamanBenar);
+        if (terakhir) {
+          showPopup('Alhamdullilah inget', 3000);
+          setTimeout(() => keHalaman(halamanBenar), 3500);
+        } else {
+          keHalaman(halamanBenar);
+        }
       } else {
         showPopup();
         setTimeout(() => keHalaman(halamanSalah), 2000);
       }
     }
 
-    // Puzzle logic (Drag & Drop + Tap-Tap)
     const puzzleContainer = document.getElementById('puzzle');
     const pieces = [...Array(9).keys()].map(i => `puzzle_pieces/piece${i}.png`);
     let currentOrder = [...pieces];
@@ -261,8 +264,8 @@ Anyway, congrats on starting college! Hope everything goes smoothly and you stay
 
     function checkSolved() {
       if (currentOrder.every((src, i) => src.endsWith(`piece${i}.png`))) {
-        showPopup('Maba UPN pinter juga nyusun puzzle');
-        setTimeout(() => keHalaman('akhir'), 1500);
+        showPopup('Maba UPN pinter juga nyusun puzzle', 3000);
+        setTimeout(() => keHalaman('akhir'), 3500);
       }
     }
 
