@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kuis untuk Machi</title>
   <style>
     * { box-sizing: border-box; }
     body, html {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: Arial, sans-serif;
     }
     .bg {
@@ -53,18 +52,24 @@
     button:hover { background-color: rgba(255, 182, 193, 1); }
     .halaman { display: none; }
     #halaman1 { display: flex; }
+
     #puzzle {
-      display: flex;
-      flex-wrap: wrap;
-      width: 300px;
-      height: 300px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 90vw;
+      max-width: 360px;
+      aspect-ratio: 1 / 1;
+      gap: 2px;
     }
     #puzzle img {
-      width: 100px;
-      height: 100px;
-      border: 1px solid white;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: 2px solid white;
       cursor: pointer;
+      border-radius: 4px;
     }
+
     #akhir img {
       margin-top: 20px;
       width: 100%;
@@ -85,7 +90,6 @@
       line-height: 1.6;
       background-color: rgba(255, 255, 255, 0.85);
       color: #ff69b4;
-      box-sizing: border-box;
     }
     @media (min-width: 768px) {
       #akhir img { max-width: 300px; }
@@ -150,7 +154,19 @@
     <h2>Kamu Lulus 💖</h2>
     <img src="8795131698_118766762413068_1753902553560.png" alt="Kamu Lulus">
     <h2>from Huksy 💌</h2>
-    <textarea readonly>Sedikit cerita. Awalnya aku lagi scroll tiktok, terus nemu konten tentang 1 Agustus. Karena aku penasaran, aku cari 1 Agustus ada apaan. Ternyata tren Girlfriend Day. Berhubung si Huksy ini masih sendiri aja, jadi web ini aku buatin buat kamu hehe. Anyway Machi, makasih ya udah nemenin aku main Roblox. Dari yang awalnya aku pake avatar robot yang sering kamu hujat, sampai sekarang akhirnya glow up dikit lah ya, hahaha. Makasih juga ya udah selalu nemenin call tiap malem. You've made some of my days feel a lot better without even trying. Kamu tuh orang nya asik, seru, lucu, dan selalu enak diajak ngobrol. Thats why I enjoy chatting with you so much. Ur mom really picked the perfect name. Machiko means sunflower, right? Totally makes sense karena kamu selalu cerah dan nyenengin buat orang di sekitar. Tapi inget ya, if you're ever feeling down or overwhelmed, dont keep it all to yourself. Talk to someone you trust or me, if you want to :D. Anyway, congrats on starting college! Hope everything goes smoothly and you stay happy and healthy. You got this, Machi!</textarea>
+    <textarea readonly>
+Sedikit cerita. Awalnya aku lagi scroll tiktok, terus nemu konten tentang 1 Agustus. Karena aku penasaran, aku cari 1 Agustus ada apaan. Ternyata tren Girlfriend Day. Berhubung si Huksy ini masih sendiri aja, jadi web ini aku buatin buat kamu hehe.
+
+Anyway Machi, makasih ya udah nemenin aku main Roblox. Dari yang awalnya aku pake avatar robot yang sering kamu hujat, sampai sekarang akhirnya glow up dikit lah ya, hahaha.
+
+Makasih juga ya udah selalu nemenin call tiap malem. You've made some of my days feel a lot better without even trying. Kamu tuh orang nya asik, seru, lucu, dan selalu enak diajak ngobrol. That's why I enjoy chatting with you so much.
+
+Ur mom really picked the perfect name. Machiko means sunflower, right? Totally makes sense karena kamu selalu cerah dan nyenengin buat orang di sekitar.
+
+Tapi inget ya, if you're ever feeling down or overwhelmed, don't keep it all to yourself. Talk to someone you trust or me, if you want to :D.
+
+Anyway, congrats on starting college! Hope everything goes smoothly and you stay happy and healthy. You got this, Machi!
+    </textarea>
   </div>
 
   <script>
@@ -183,10 +199,11 @@
       }
     }
 
-    // Puzzle logic
+    // Puzzle logic (Drag & Drop + Tap-Tap)
     const puzzleContainer = document.getElementById('puzzle');
     const pieces = [...Array(9).keys()].map(i => `puzzle_pieces/piece${i}.png`);
     let currentOrder = [...pieces];
+    let selectedIndex = null;
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -201,32 +218,52 @@
       currentOrder.forEach((src, index) => {
         const img = document.createElement('img');
         img.src = src;
-        img.draggable = true;
         img.dataset.index = index;
-        img.addEventListener('dragstart', dragStart);
+
+        img.draggable = true;
+        img.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', index);
+        });
         img.addEventListener('dragover', e => e.preventDefault());
-        img.addEventListener('drop', dropPiece);
+        img.addEventListener('drop', e => {
+          const from = +e.dataTransfer.getData('text/plain');
+          const to = +e.target.dataset.index;
+          swapPieces(from, to);
+          renderPuzzle();
+          checkSolved();
+        });
+
+        img.addEventListener('click', () => {
+          if (selectedIndex === null) {
+            selectedIndex = index;
+            highlight(index);
+          } else {
+            swapPieces(selectedIndex, index);
+            selectedIndex = null;
+            renderPuzzle();
+            checkSolved();
+          }
+        });
+
         puzzleContainer.appendChild(img);
       });
     }
 
-    let draggedIndex;
-    function dragStart(e) {
-      draggedIndex = +e.target.dataset.index;
+    function highlight(index) {
+      const imgs = puzzleContainer.querySelectorAll('img');
+      imgs.forEach(img => img.style.border = '2px solid white');
+      imgs[index].style.border = '3px solid #ff69b4';
     }
 
-    function dropPiece(e) {
-      const targetIndex = +e.target.dataset.index;
-      [currentOrder[draggedIndex], currentOrder[targetIndex]] = [currentOrder[targetIndex], currentOrder[draggedIndex]];
-      renderPuzzle();
-      if (isPuzzleSolved()) {
+    function swapPieces(i, j) {
+      [currentOrder[i], currentOrder[j]] = [currentOrder[j], currentOrder[i]];
+    }
+
+    function checkSolved() {
+      if (currentOrder.every((src, i) => src.endsWith(`piece${i}.png`))) {
         showPopup('Maba UPN pinter juga nyusun puzzle');
         setTimeout(() => keHalaman('akhir'), 1500);
       }
-    }
-
-    function isPuzzleSolved() {
-      return currentOrder.every((src, i) => src.endsWith(`piece${i}.png`));
     }
 
     currentOrder = shuffle(currentOrder);
